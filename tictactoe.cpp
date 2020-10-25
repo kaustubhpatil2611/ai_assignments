@@ -9,7 +9,7 @@ struct Move
     int row, col; 
 }; 
 
-int calculatescore(char board[n][n])
+int calculatescore(char board[3][3])
 {
     int i,j;
     int flag=false;
@@ -38,7 +38,7 @@ int calculatescore(char board[n][n])
     }
     for(i=1;i<n;i++)//down-top diagonal check
     {
-        if(board[i][n-i-1]==board[i-1][n-i-2])
+        if(board[i][n-i-1]==board[i-1][n-i])
         {
             flag=true;
         }
@@ -148,6 +148,29 @@ int minimax(char board[n][n],int depth,bool player)
   
     if (score == -10) 
         return score; 
+        
+    int flag=0;
+    for(int i=0;i<n;i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            if(board[i][j]=='_')//if no one won and moves remaining
+            {
+                flag=1;
+                break;
+            }
+
+        }
+        if(flag==1)
+        {
+        	break;
+		}
+    }
+	if(flag==0)
+	{
+		return 0;
+	}
+    
 
     if(player)//maximizer turn selects the highest value
     {
@@ -168,6 +191,7 @@ int minimax(char board[n][n],int depth,bool player)
             }
             
         }
+        return best;
     }
     else//minimizer turn selects the least value
     {
@@ -190,11 +214,13 @@ int minimax(char board[n][n],int depth,bool player)
             }
             
         }
+        return best;
     }
 
 }
 
-bool findBestMove(char board[n][n]) 
+
+bool findBestMove(char board[3][3]) 
 { 
     int bestVal = -1000; 
     Move bestMove; 
@@ -261,12 +287,29 @@ bool findBestMove(char board[n][n])
 int main()
 {
     int x,y;
-    board= 
-    { 
-        { 'X', '_', '_' }, 
-        { '_', '_', '_' }, 
-        { '_', '_', '_' } 
-    }; 
+    for(int i=0;i<n;i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            /* code */
+            board[i][j]='_';
+        }
+        
+    }
+    int z1=rand()%3;
+    int z2=rand()%3;
+    board[z1][z2]='X';
+    cout<<"Current Board configuration"<<endl;
+    for(int i=0;i<n;i++)
+            {
+                for (int j = 0; j < n; j++)
+                {
+                    /* code */
+                    cout<<board[i][j]<<" ";
+                }
+                cout<<endl;
+                cout<<endl;
+            }
     while(1)//while game continues
     {
         cout<<"Enter your Move: ";
@@ -295,4 +338,5 @@ int main()
             cout<<"Please enter proper coordinates"<<endl;
         }
     }
+    
 }
