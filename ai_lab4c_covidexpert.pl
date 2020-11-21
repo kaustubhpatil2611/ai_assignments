@@ -1,137 +1,134 @@
-/* knowledge base*/
+/*This is covid expert program that generates a score out of 10 for the chances of you being affected by covid */
 
-/*tasks*/
-activity(' sing,talk,think,write,read.').
+/*symptoms with a covid score*/
+symptom(fever,3).
+symptom(cough,2).
+symptom(headache,2).
+symptom(nausea,2).
+symptom(breathing_problem,3).
+symptom(cold,1).
+symptom(throat_ache,3).
+/*travel history*/
+history(china).
+history(usa).
+history(italy).
+history(south_africa).
+history(brazil).
+/*preexisting diseases*/
+diseases(obesity).
+diseases(diabetes).
+diseases(asthama).
+diseases(chronic_lung_disease).
+/*covid zones along with the zone name and a covid score*/
+zone(pune,red,3).
+zone(mumbai,red,3).
+zone(nagpur,red,3).
+zone(latur,orange,2).
+zone(nashik,red,3).
+zone(aurangabad,red,3).
+zone(ratnagiri,orange,2).
+zone(parbhani,yellow,1).
+zone(gadchiroli,green,0).
+zone(sindhudurg,green,0).
+zone(sangli,orange,2).
 
-task(sing,'Why this kolaveri kolaveri kolaveri deeeeee..... ').
-task(talk,'I am currently talking. :)').
-task(think,'I am currently thinking. :)').
-task(write,'See i have wriiten this statement itself. :)').
-task(read,'Yes i will do read your commands :)').
+/*start of the program*/
+test:-write('Hello! I am covid checker.'), nl,test1(0).
 
-/*tellme tasks*/
-tellme(joke,'what do we call a rose who wants to go to moon...> Gulab-ja-moon.. :)').
-tellme(rhyme,'Eliza Eliza > yes papa... Eating RAM > no papa.... Telling lies > no papa....open your mouth > hahahaha(lots of memory).. :)').
-tellme(story,'once there lived a man .... thats it :)').
-
-/*facts for checking if the person is in positive or negative mood*/
-positive(happy).
-positive(nice).
-positive(well).
-positive(good).
-positive(excited).
-negative(bored).
-negative(sad).
-negative(unwell).
-negative(stressed).
-negative(depressed).
-/*facts for checking if the person is giving positive or negative feedback for eliza*/
-positivef(awesome).
-positivef(amazing).
-positivef(nice).
-positivef(smart).
-positivef(interesting).
-negativef(boring).
-negativef(irritating).
-negativef(stupid).
-negativef(frustating).
-
-
-/*dynamic list for randomly slecting a response*/
-:- dynamic confuse/1.
-confuse(['Please speak again.','Ok,thats something new.', 'Oh I see.', 'Oh,I didnt knew it.']).
-
-eliza:-
-	write('Hello, I am Eliza.'),nl,nl,
-	eliza_loop.
-
-eliza_loop:-
-	write('Eliza:-'),
+/*test1(0) initializes the test score to 0*/
+/*add up the score for each disease and send to initial_score*/
+test1(Z):-
+    write('Please enter symptoms:'),
+    read(S),
+	symptom(S,X),
+	Y is X+Z,
+	write('Any more symptoms?(yes/no): '),
 	read(Input),
-	reply(Input).
-
-/*can you questions*/
-reply([can,you,X | _ ]):-
-    ( task(X,Y) /*check*/
-    ->write( 'yes i can '),write(X),nl,nl/*if fact checked*/
-    ,eliza_loop
-    ; write('no i cannot '),write(X),nl,nl/*else*/
-    ,eliza_loop
+	( Input=yes
+    ->test1(Y)
+    ; initial_score(Y)
     ).
-
-/*intro reply*/
-reply([hello,i,am,Name | _ ]) :-
-    write('Hello, '), write(Name), write('! Pleased to meet you.'),nl,nl,
-    eliza_loop.
-
-/* reply*/
-reply([tell,me,a,X | _ ]):-
-    ( tellme(X,Y)
-    ->write(Y),nl,nl/*if fact checked*/
-    ,eliza_loop
-    ;write('Sorry, i cant tell a '),write(X),nl,nl/*else*/
-    ,eliza_loop
-    ).
-
-/*perform tasks*/
-reply([X | _]):-
-    task(X,Y),write(Y),nl,nl,eliza_loop.
-
-/*tell todays date*/
-reply([tell,me,todays,date]) :-
-    date(X),write(X),nl,nl,
-    eliza_loop.
-
-/*eliza's activities*/
-reply([what,can,you,do | _ ]) :-
-    write('I can '),activity(X),write(X),nl,nl,
-    eliza_loop.
-
-/*how are you reply*/
-reply([how,are,you]) :-
-    write('i am good, its nice talking to you.'),nl,
-    write('How are you?'),nl,nl,
-    eliza_loop.
-
-/*reply to persons mood*/
-reply([i,am,X | _ ]):-
-    /*if positive mood*/
-    (positive(X) ->
-        write('Thats great that you are '),write(X),nl,nl,eliza_loop
-        /*if negative mood*/
-    ;   (negative(X) ->
-            write('Oh, please dont feel yourself '),write(X),nl,nl,eliza_loop
-            /*else if didnt understood*/
-        ;   write('Oh i didnt knew it...'),nl,nl,eliza_loop
+ 
+/*from here in each predicate vaiable A carries the test score*/
+/*pass score to predicate check_history depending upon the test1 score*/
+initial_score(A):-
+	(A >5 ->
+        nl,check_history(3)
+    ;   (A > 3 ->
+            nl,check_history(2)
+        ;	(A >1 ->
+        		nl,check_history(1)
+    		;	nl,check_history(0)
+    		)
         )
     ).
 
-/*reply to feedback*/
-reply([you,are,X | _ ]):-
-    /*if positive feedback*/
-    (positivef(X) ->
-        write('Thank you! You too are '),write(X),nl,nl,eliza_loop
-        /*if negative feedback*/
-    ;   (negativef(X) ->
-            write('I am sorry for being a '),write(X),write(' chatbot'),nl,nl,eliza_loop
-            /*else if didnt understood feedback*/
-        ;   write('Oh i might be so...'),nl,nl,eliza_loop
+/*pass score to predicate check_zone depending upon the travel hisory*/
+check_history(A):-
+	write('Do you have any travel history?(type country name / no): '),read(H),Z is A+2, 
+	(history(H)
+	-> check_zone(Z),nl
+	; check_zone(A),nl
+	).
+
+/*pass score to predicate check_proffesion depending upon the Zone*/
+check_zone(A):-
+	write('Where do you live?: '),read(Z),
+	zone(Z,X,Y),
+	write('You are in '),write(X),write(' zone!!'),S is A+Y,nl,nl,
+	check_proffession(S).
+
+/*pass score to predicate check_disease depending upon the condition*/
+check_proffession(A):-
+	write('Are you a health worker?(yes/no): '),read(Z),
+	(Z=yes
+	-> write('Please Take care!'),nl,nl,S is A+2,check_disease(S)
+	; write('Be safe at home and dont get out of house!'),nl,nl,check_disease(A)
+	).
+
+/*pass score to predicate check_spread depending upon if person has pre existing disease*/
+check_disease(A):-
+	write('Do you have any pre existing disease,if yes then which?: '),read(Z),
+	(diseases(Z)
+	-> write('Oh,take care! You are at slightly more risk'),S is A + 1,nl,nl,check_spread(S)
+	; write('Good,you are safe'),nl,check_spread(A)
+	).
+
+/*pass score to predicate check_age depending upon the contact*/
+check_spread(A):-
+	write('Have you come in direct contact with a covid patient?: '),read(Z),
+	(Z=yes
+	-> write('You must get your test done!'),S is A + 5,nl,nl,check_age(S)
+	; write('Good,you are safe'),nl,check_age(A)
+	).
+
+/*pass score to predicate check_out depending upon the age*/
+check_age(A):-
+	write('Is your age above 45 ?: '),read(Z),
+	(Z=yes
+	-> write('Oh,take care! You are at high risk'),S is A + 2,nl,nl,check_out(S)
+	; write('Good,you are safe'),nl,check_out(A)
+	).
+
+/*pass score to predicate final_score depending upon time out of house*/
+check_out(A):-
+	write('Have you been out of your house,for how many minutes?(type 0 if not gone out): '),read(Z),
+	(Z>30 ->
+		nl,S is A + 2,nl,final_score(S)
+		;(Z >15 ->
+	        nl,S is A + 1,nl,final_score(S)
+	    ;   nl,S is A + 0,nl,final_score(S)
+	    )
+	).
+
+/*final score is calculated*/
+final_score(A):-
+	/*score calculated out of 22 scaled down to 10*/
+	S is A/2.2,
+	(S >6 ->
+        nl,write('You are at High risk for COVID-19'),write(' with a score of '),write(S),write(' from 10'),nl,write('So please get yourself tested immediately and be in isolation!')
+    ;   (S > 4 ->
+            nl,write('You are at Medium risk for COVID-19'),write(' with a score of '),write(S),write(' from 10'),nl,write('So if you get more ill then get yourself tested!')
+        ;   nl,write('You are at Low risk for COVID-19'),write(' with a score of '),write(S),write(' from 10'),nl,write('You are most likely safe !')
         )
     ).
-
-/*stop eliza*/
-reply([bye | _ ]):-
-    write('Felt nice talking to you!, Bye....').
-
-/*random reply if didnt understand query*/
-reply([ Y | _ ]) :-
-    retract(confuse([ Next | Rest ])),
-    append(Rest, [ Next ], NewExcuseList),
-    asserta(confuse(NewExcuseList)),
-    write(Next), nl,nl,
-    eliza_loop.
-
-/*reply if the query is not in brackets*/
-reply(X):-
-    write('please type your query in square brackets.'),nl,nl,
-    eliza_loop.
